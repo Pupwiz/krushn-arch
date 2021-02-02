@@ -77,10 +77,35 @@ pacstrap /mnt base base-devel zsh grml-zsh-config grub os-prober intel-ucode efi
 
 # Generate fstab
 genfstab -U /mnt >> /mnt/etc/fstab
+# Set date time
+ln -sf /usr/share/zoneinfo/America/Detroit /etc/localtime
+hwclock --systohc
+# Set locale to en_US.UTF-8 UTF-8
+sed -i '/en_US.UTF-8 UTF-8/s/^#//g' /etc/locale.gen
+locale-gen
+echo "LANG=en_US.UTF-8" >> /etc/locale.conf
+# Set hostname
+echo "dataserver" >> /etc/hostname
+echo "127.0.1.1 dataserver.localdomain  dataserver" >> /etc/hosts
+# Generate initramfs
+mkinitcpio -P
+# Set root password
+passwd dataserver
+# Install bootloader
+grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=arch
+grub-mkconfig -o /boot/grub/grub.cfg
+# Create new user
+useradd -m -G wheel,power,input,storage,uucp,network -s /usr/bin/sh media
+sed --in-place 's/^#\s*\(%wheel\s\+ALL=(ALL)\s\+NOPASSWD:\s\+ALL\)/\1/' /etc/sudoers
+echo "Set password for new user"
+passwd password
+sudo -u media git clone https://aur.archlinux.org/yay.git
+cd yay
+sudo -u media makepkg -si
+# Enable services
+systemctl enable NetworkManager.service
+exit
 
-# Copy post-install system cinfiguration script to new /root
-cp -rfv post-install.sh /mnt/root
-chmod a+x /mnt/root/post-install.sh
 
 # Chroot into new system
 echo "After chrooting into newly installed OS, please run the post-install.sh by executing ./post-install.sh"
