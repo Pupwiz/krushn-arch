@@ -52,7 +52,7 @@ sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << EOF | fdisk /dev/sda
 EOF
 
 # Format the partitions
-mkfs.ext4 /dev/sda3
+mkfs.btrfs /dev/sda3
 mkfs.fat -F32 /dev/sda1
 
 # Set up time
