@@ -72,11 +72,14 @@ swapon /dev/sda2
 
 # Install Arch Linux
 echo "Starting install.."
-echo "Installing Arch Linux, KDE with Konsole and Dolphin and GRUB2 as bootloader" 
-pacstrap /mnt base base-devel zsh grml-zsh-config grub os-prober intel-ucode efibootmgr dosfstools freetype2 fuse2 mtools iw wpa_supplicant dialog xorg xorg-server xorg-xinit mesa xf86-video-intel plasma konsole dolphin
+echo "Installing Arch Linux, " 
+pacstrap /mnt base base-devel grub os-prober intel-ucode efibootmgr dosfstools ffmpeg git
 
 # Generate fstab
 genfstab -U /mnt >> /mnt/etc/fstab
+
+cat <<EOF >> /mnt/root/settings.sh
+#! /bin/bash
 # Set date time
 ln -sf /usr/share/zoneinfo/America/Detroit /etc/localtime
 hwclock --systohc
@@ -105,17 +108,7 @@ sudo -u media makepkg -si
 # Enable services
 systemctl enable NetworkManager.service
 exit
-
-
-# Chroot into new system
-echo "After chrooting into newly installed OS, please run the post-install.sh by executing ./post-install.sh"
-echo "Press any key to chroot..."
-read tmpvar
+<<EOF
 arch-chroot /mnt /bin/bash
-
-# Finish
-echo "If post-install.sh was run succesfully, you will now have a fully working bootable Arch Linux system installed."
-echo "The only thing left is to reboot into the new system."
-echo "Press any key to reboot or Ctrl+C to cancel..."
-read tmpvar
+sh /root/settings.sh
 reboot
