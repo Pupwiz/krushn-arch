@@ -61,7 +61,7 @@ timedatectl set-ntp true
 # Initate pacman keyring
 pacman-key --init
 pacman-key --populate archlinux
-pacman-key --refresh-keys
+#pacman-key --refresh-keys
 
 # Mount the partitions
 mount /dev/sda3 /mnt
@@ -73,7 +73,7 @@ swapon /dev/sda2
 # Install Arch Linux
 echo "Starting install.."
 echo "Installing Arch Linux, " 
-pacstrap /mnt base base-devel grub os-prober intel-ucode efibootmgr dosfstools ffmpeg git
+pacstrap /mnt base base-devel grub os-prober intel-ucode efibootmgr dosfstools mkinitcpio linux linux-firmware git networkmanager
 
 # Generate fstab
 genfstab -U /mnt >> /mnt/etc/fstab
@@ -93,7 +93,7 @@ echo "127.0.1.1 dataserver.localdomain  dataserver" >> /etc/hosts
 # Generate initramfs
 mkinitcpio -P
 # Set root password
-passwd dataserver
+echo "root:dataserver" | chpasswd
 # Install bootloader
 grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=arch
 grub-mkconfig -o /boot/grub/grub.cfg
@@ -101,14 +101,15 @@ grub-mkconfig -o /boot/grub/grub.cfg
 useradd -m -G wheel,power,input,storage,uucp,network -s /usr/bin/sh media
 sed --in-place 's/^#\s*\(%wheel\s\+ALL=(ALL)\s\+NOPASSWD:\s\+ALL\)/\1/' /etc/sudoers
 echo "Set password for new user"
-passwd password
+echo "media:media" | chpasswd
+cd /home/media
 sudo -u media git clone https://aur.archlinux.org/yay.git
 cd yay
 sudo -u media makepkg -si
 # Enable services
 systemctl enable NetworkManager.service
 exit
-<<EOF
+EOF
 arch-chroot /mnt /bin/bash
 sh /root/settings.sh
 reboot
