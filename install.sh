@@ -73,7 +73,7 @@ swapon /dev/sda2
 # Install Arch Linux
 echo "Starting install.."
 echo "Installing Arch Linux, " 
-pacstrap /mnt base base-devel grub os-prober intel-ucode efibootmgr dosfstools mkinitcpio linux linux-firmware git networkmanager
+pacstrap /mnt base base-devel grub os-prober intel-ucode efibootmgr dosfstools mkinitcpio linux linux-firmware git
 
 # Generate fstab
 genfstab -U /mnt >> /mnt/etc/fstab
@@ -97,6 +97,8 @@ echo "root:dataserver" | chpasswd
 # Install bootloader
 grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=arch
 grub-mkconfig -o /boot/grub/grub.cfg
+pacman -Syu
+pacman -S networkmanager transmission-cli --noconfirm --needed
 # Create new user
 useradd -m -G wheel,power,input,storage,uucp,network -s /usr/bin/sh media
 sed --in-place 's/^#\s*\(%wheel\s\+ALL=(ALL)\s\+NOPASSWD:\s\+ALL\)/\1/' /etc/sudoers
@@ -105,7 +107,7 @@ echo "media:media" | chpasswd
 cd /home/media
 sudo -u media git clone https://aur.archlinux.org/yay.git
 cd yay
-sudo -u media makepkg -si
+sudo -u media makepkg -si --noconfrim
 # Enable services
 systemctl enable NetworkManager.service
 exit
